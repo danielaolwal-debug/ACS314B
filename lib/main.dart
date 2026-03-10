@@ -8,7 +8,7 @@ void main() {
         appBar: AppBar(
           backgroundColor: const Color.fromARGB(255, 97, 225, 32),
           title: const Text(
-            "Login Screen",
+            "Sign Up Screen",
             style: TextStyle(
               color: Colors.black,
               fontSize: 20,
@@ -21,20 +21,20 @@ void main() {
           padding: const EdgeInsets.all(15.0),
           child: SingleChildScrollView(
             child: Column(
-              // mainAxisAlignment: MainAxisAlignment.center,
-              // crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Image.asset('assets/hendricks.webp'),
                 const Text(
-                  "Login Screen",
+                  "Create Account",
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 25,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+
+                // Username
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                  padding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: const [
@@ -49,14 +49,40 @@ void main() {
                   ),
                 ),
                 TextField(
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    hintText: "Use Email or Username",
+                    hintText: "Choose a username",
                     prefixIcon: Icon(Icons.person),
                   ),
                 ),
+
+                // Email
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                  padding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: const [
+                      Text(
+                        "Enter your email",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                TextField(
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: "Enter your email",
+                    prefixIcon: Icon(Icons.email),
+                  ),
+                ),
+
+                // Password
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: const [
@@ -70,25 +96,49 @@ void main() {
                     ],
                   ),
                 ),
-                const SizedBox(height: 10.0),
                 TextField(
-                  obscureText: true, // hides password input
-                  decoration: InputDecoration(
+                  obscureText: true,
+                  decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     hintText: "Enter your password",
-                    prefixIcon: Icon(Icons.lock), // corrected icon
-                    suffixIcon: Icon(
-                      Icons.visibility_off,
-                    ), // added visibility icon
+                    prefixIcon: Icon(Icons.lock),
+                    suffixIcon: Icon(Icons.visibility_off),
                   ),
                 ),
+
+                // Confirm Password
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: const [
+                      Text(
+                        "Confirm your password",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                TextField(
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: "Re-enter your password",
+                    prefixIcon: Icon(Icons.lock),
+                    suffixIcon: Icon(Icons.visibility_off),
+                  ),
+                ),
+
                 const SizedBox(height: 20),
                 MaterialButton(
                   onPressed: () {},
                   color: Colors.grey,
                   textColor: Colors.teal,
                   child: const Text(
-                    "Login",
+                    "Sign Up",
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -96,6 +146,7 @@ void main() {
                     ),
                   ),
                 ),
+
                 Container(
                   height: 50,
                   alignment: Alignment.center,
@@ -105,11 +156,11 @@ void main() {
                   ),
                   padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
                   child: Row(
-                    children: [
-                      Text("dont have an account?"),
+                    children: const [
+                      Text("Already have an account?"),
                       SizedBox(width: 5),
                       Text(
-                        "Sign Up",
+                        "Login",
                         style: TextStyle(
                           color: Colors.blue,
                           fontWeight: FontWeight.bold,
@@ -117,14 +168,7 @@ void main() {
                       ),
                       Spacer(),
                       Text(
-                        "Forgot Password?",
-                        style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        "Reset Password",
+                        "Need Help?",
                         style: TextStyle(
                           color: Colors.blue,
                           fontWeight: FontWeight.bold,
