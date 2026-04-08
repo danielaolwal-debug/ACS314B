@@ -1,0 +1,5 @@
+class Study{
+    String name;
+    String description;
+    Study(this.name, this.description);
+}
