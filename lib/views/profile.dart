@@ -47,7 +47,7 @@ class Profile extends StatelessWidget {
               children: const [
                 _Stat("42", "Lessons"),
                 _Stat("18", "Quizzes"),
-                _Stat("14🔥", "Streak"),
+                _Stat("14", "Streak"),
               ],
             ),
 

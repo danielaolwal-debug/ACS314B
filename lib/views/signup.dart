@@ -169,7 +169,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ;
                         final response = await http.get(
                           Uri.parse(
-                            "http://192.168.12.1/studyplanner/create.php?firstname=${firstname.text}&lastname=${lastname.text}&email=${email.text}&password=${password.text}",
+                            "http://localhost/studyplanner/create.php?firstname=${firstname.text}&lastname=${lastname.text}&email=${email.text}&password=${password.text}",
                           ),
                         );
                         if (response.statusCode == 200) {

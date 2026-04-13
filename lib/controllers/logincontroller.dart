@@ -16,6 +16,6 @@ class Logincontroller extends GetxController {
   }
 
   togglePassword() {
-    isPasswordVisible.value = isPasswordVisible.value;
+    isPasswordVisible.value = !isPasswordVisible.value;
   }
 }

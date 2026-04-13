@@ -1,143 +1,117 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-class LessonsScreen extends StatefulWidget {
-  final String subject;
-
-  const LessonsScreen({super.key, required this.subject});
-
-  @override
-  State<LessonsScreen> createState() => _LessonsScreenState();
-}
-
-class _LessonsScreenState extends State<LessonsScreen> {
-  int? selected;
-
-  //  Properly typed list
-  final List<Map<String, dynamic>> lessons = [
-    {'title': 'Intro', 'time': '10 min', 'locked': false, 'done': true},
-    {'title': 'Core 1', 'time': '20 min', 'locked': false, 'done': true},
-    {'title': 'Core 2', 'time': '25 min', 'locked': false, 'done': false},
-    {'title': 'Applications', 'time': '30 min', 'locked': false, 'done': false},
-    {'title': 'Mistakes', 'time': '15 min', 'locked': true, 'done': false},
-  ];
-
-  //  Progress calculation
-  double get progress {
-    int done = lessons.where((l) => l['done'] == true).length;
-    return lessons.isEmpty ? 0 : done / lessons.length;
-  }
+class LessonsScreen extends StatelessWidget {
+  const LessonsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0D1F0F),
+    final subject = Get.arguments as Map<String, dynamic>? ?? {};
+    final subjectName = subject['name'] ?? 'Lessons';
+    final color = (subject['color'] as Color?) ?? Colors.green;
 
+    final List<Map<String, dynamic>> lessons = List.generate(
+      8,
+      (i) => {
+        'title': 'Lesson ${i + 1}',
+        'desc': 'Introduction to topic ${i + 1} in $subjectName',
+        'duration': '${10 + i * 5} min',
+        'done': i < 3,
+      },
+    );
+
+    return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: Text(widget.subject),
-        backgroundColor: const Color(0xFF0D1F0F),
-        foregroundColor: Colors.white,
+        title: Text(
+          subjectName,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: color,
+        centerTitle: true,
         elevation: 0,
       ),
-
-      body: Column(
-        children: [
-          // 🔹 Progress bar
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: LinearProgressIndicator(
-              value: progress,
-              backgroundColor: Colors.white12,
-              valueColor: const AlwaysStoppedAnimation(Colors.green),
+      body: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: lessons.length,
+        itemBuilder: (context, i) {
+          final lesson = lessons[i];
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-          ),
-
-          //  Lessons list
-          Expanded(
-            child: ListView.builder(
-              itemCount: lessons.length,
-              itemBuilder: (context, i) {
-                final lesson = lessons[i];
-
-                //
-                final String title = lesson['title'] as String;
-                final String time = lesson['time'] as String;
-                final bool locked = lesson['locked'] as bool;
-                final bool done = lesson['done'] as bool;
-
-                return ListTile(
-                  title: Text(
-                    title,
-                    style: TextStyle(
-                      color: locked ? Colors.white30 : Colors.white,
-                    ),
+            child: ListTile(
+              contentPadding: const EdgeInsets.all(16),
+              leading: Container(
+                height: 48,
+                width: 48,
+                decoration: BoxDecoration(
+                  color: lesson['done'] as bool
+                      ? color.withOpacity(0.15)
+                      : Colors.grey[100],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  lesson['done'] as bool
+                      ? Icons.check_circle
+                      : Icons.play_circle_outline,
+                  color: lesson['done'] as bool ? color : Colors.grey,
+                  size: 28,
+                ),
+              ),
+              title: Text(
+                lesson['title'] as String,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 4),
+                  Text(
+                    lesson['desc'] as String,
+                    style: TextStyle(color: Colors.grey[500], fontSize: 12),
                   ),
-                  subtitle: Text(
-                    time,
-                    style: const TextStyle(color: Colors.white54),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.timer, size: 12, color: Colors.grey[400]),
+                      const SizedBox(width: 4),
+                      Text(
+                        lesson['duration'] as String,
+                        style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                      ),
+                    ],
                   ),
-
-                  // 🔹 Left icon
-                  leading: done
-                      ? const Icon(Icons.check, color: Colors.green)
-                      : locked
-                      ? const Icon(Icons.lock, color: Colors.white30)
-                      : Text(
-                          '${i + 1}',
-                          style: const TextStyle(color: Colors.white),
-                        ),
-
-                  // 🔹 Right icon
-                  trailing: !locked
-                      ? const Icon(Icons.play_circle, color: Colors.green)
-                      : null,
-
-                  // 🔹 Tap action
-                  onTap: () {
-                    if (locked) return;
-
-                    setState(() => selected = i);
-
-                    showModalBottomSheet(
-                      context: context,
-                      backgroundColor: const Color(0xFF1A3A1A),
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(20),
-                        ),
-                      ),
-                      builder: (_) => Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              title,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              "Duration: $time",
-                              style: const TextStyle(color: Colors.white70),
-                            ),
-                            const SizedBox(height: 20),
-                            ElevatedButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text("Start Lesson"),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
+                ],
+              ),
+              trailing: ElevatedButton(
+                onPressed: () => Get.toNamed('/quiz', arguments: subject),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: color,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  "Start",
+                  style: TextStyle(color: Colors.white, fontSize: 12),
+                ),
+              ),
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }

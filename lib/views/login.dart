@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_application_1/controllers/logincontroller.dart';
@@ -13,16 +12,84 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // ✅ Moved inside State to avoid lifecycle issues
   final Logincontroller logincontroller = Get.put(Logincontroller());
-  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   @override
   void dispose() {
-    usernameController.dispose();
+    emailController.dispose();
     passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> loginUser() async {
+    if (emailController.text.isEmpty) {
+      Get.snackbar(
+        "Error",
+        "Enter email",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    if (passwordController.text.isEmpty) {
+      Get.snackbar(
+        "Error",
+        "Enter password",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse("http://localhost/studyplanner/login.php"),
+        body: {
+          'email': emailController.text.trim(),
+          'password': passwordController.text.trim(),
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final serverData = jsonDecode(response.body);
+
+        if (serverData['success'] == true) {
+          final user = serverData['user'];
+          Get.snackbar(
+            "Welcome",
+            "Hello ${user['firstname'].toString().isEmpty ? user['lastname'] : user['firstname']}!",
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+          );
+          // ✅ Fixed route name to match your GetPage definition
+          Get.offAllNamed("/HomeScreen");
+        } else {
+          Get.snackbar(
+            "Login Failed",
+            serverData['message'] ?? "Invalid credentials",
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
+      } else {
+        Get.snackbar(
+          "Server Error",
+          "Code: ${response.statusCode}",
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        "Network Error",
+        e.toString(),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
   }
 
   @override
@@ -32,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         title: const Text(
           "Login",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.green,
@@ -40,17 +107,17 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SingleChildScrollView(
         child: Center(
           child: Card(
-            color: Colors.white,
             elevation: 5,
+            margin: const EdgeInsets.all(20),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
-            margin: const EdgeInsets.all(20),
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Avatar
                   Container(
                     height: 100,
                     width: 100,
@@ -64,13 +131,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: Colors.green,
                     ),
                   ),
+
                   const SizedBox(height: 20),
 
+                  // Email field
                   TextField(
-                    controller: usernameController,
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      labelText: "Email or Username",
-                      prefixIcon: const Icon(Icons.person, color: Colors.green),
+                      labelText: "Email",
+                      prefixIcon: const Icon(Icons.email, color: Colors.green),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -78,12 +148,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       fillColor: Colors.grey[100],
                     ),
                   ),
+
                   const SizedBox(height: 15),
 
+                  // Password field
                   Obx(
                     () => TextField(
                       controller: passwordController,
-                      obscureText: logincontroller.isPasswordVisible.value,
+                      obscureText: !logincontroller.isPasswordVisible.value,
                       decoration: InputDecoration(
                         labelText: "Password",
                         prefixIcon: const Icon(Icons.lock, color: Colors.green),
@@ -91,8 +163,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           onTap: () => logincontroller.togglePassword(),
                           child: Icon(
                             logincontroller.isPasswordVisible.value
-                                ? Icons.visibility_off
-                                : Icons.visibility,
+                                ? Icons.visibility
+                                : Icons.visibility_off,
                             color: Colors.green,
                           ),
                         ),
@@ -104,12 +176,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 20),
 
+                  // ✅ Fixed Login button
                   MaterialButton(
-                    onPressed: () {
-                      Get.toNamed('/home');
-                    },
+                    onPressed: loginUser,
                     color: Colors.green,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -127,42 +199,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 15),
 
-                  GestureDetector(
-                    onTap: () {
-                      bool success = logincontroller.login(
-                        usernameController.text,
-                        passwordController.text,
-                      );
-                      if (success) {
-                        Get.offAndToNamed("/homeScreen");
-                      } else {
-                        Get.snackbar(
-                          "Login Failed",
-                          "Invalid Username or Password",
-                          backgroundColor: Colors.red,
-                          colorText: Colors.white,
-                        );
-                      }
-                    },
-                    child: const Text(
-                      "Login with credentials",
-                      style: TextStyle(
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
                   const SizedBox(height: 20),
 
+                  // Sign up redirect
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        "Don't have an account?",
-                        style: TextStyle(fontWeight: FontWeight.w500),
-                      ),
+                      const Text("Don't have an account?"),
                       TextButton(
                         onPressed: () => Get.toNamed('/signup'),
                         child: const Text(
@@ -172,58 +216,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
-                      GestureDetector(
-                        child: const Text("login"),
-                        onTap: () async {
-                          if (usernameController.text.isEmpty) {
-                            Get.snackbar(
-                              "Error",
-                              "Enter username or email",
-                              backgroundColor: Colors.red,
-                              colorText: Colors.white,
-                            );
-                          } else if (passwordController.text.isEmpty) {
-                            Get.snackbar(
-                              "Error",
-                              "Enter password",
-                              backgroundColor: Colors.red,
-                              colorText: Colors.white,
-                            );
-                          } else {
-                            // ✅ Fixed: corrected spelling of 'response'
-                            final response = await http.get(
-                              Uri.parse(
-                                "http://192.168.0.111/studyplanner/login.php?username=${usernameController.text}&password=${passwordController.text}",
-                              ),
-                            );
-
-                            // ✅ Fixed: properly structured if/else with correct braces
-                            if (response.statusCode == 200) {
-                              final serverData = jsonDecode(response.body);
-
-                              // ✅ Fixed: added null else branch to ternary
-                              // ✅ Fixed: square brackets for map access
-                              if (serverData['success'] == true) {
-                                Get.offAndToNamed("/homeScreen");
-                              } else {
-                                Get.snackbar(
-                                  "Wrong credentials",
-                                  serverData['message'], // ✅ Fixed: [] not ()
-                                  backgroundColor: Colors.red,
-                                  colorText: Colors.white,
-                                );
-                              }
-                            } else {
-                              Get.snackbar(
-                                "Error",
-                                "Server error: ${response.statusCode}",
-                                backgroundColor: Colors.red,
-                                colorText: Colors.white,
-                              );
-                            }
-                          }
-                        },
                       ),
                     ],
                   ),
