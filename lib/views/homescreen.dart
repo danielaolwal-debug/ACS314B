@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/views/leaderboard.dart';
 import 'package:flutter_application_1/views/lessons.dart';
 import 'package:flutter_application_1/views/quiz.dart';
-import 'package:flutter_application_1/views/results.dart';
 import 'profile.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,32 +13,47 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _index = 0;
 
+  // ✅ Controllers for ADD TASK
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _subjectController = TextEditingController();
+
   final List<Map<String, dynamic>> _tasks = [
     {
-      'title': 'Read Chapter 2',
-      'subject': 'History',
+      'title': 'Read ASC 314 Chapter 1',
+      'subject': 'Computer Science',
       'done': false,
-      'color': Colors.purple,
+      'color': Colors.green,
     },
     {
-      'title': 'Practice Flutter',
-      'subject': 'Programming',
-      'done': false,
+      'title': 'Practice Flutter Routing',
+      'subject': 'Mobile Development',
+      'done': true,
       'color': Colors.blue,
     },
     {
-      'title': 'Solve Math Exercises',
+      'title': 'Solve Math Assignment',
       'subject': 'Mathematics',
       'done': false,
       'color': Colors.orange,
     },
-    {
-      'title': 'Biology Notes Review',
-      'subject': 'Biology',
-      'done': false,
-      'color': Colors.green,
-    },
   ];
+
+  // ✅ ADD TASK FUNCTION
+  void _addTask() {
+    if (_titleController.text.trim().isNotEmpty &&
+        _subjectController.text.trim().isNotEmpty) {
+      setState(() {
+        _tasks.insert(0, {
+          'title': _titleController.text.trim(),
+          'subject': _subjectController.text.trim(),
+          'done': false,
+          'color': Colors.purple,
+        });
+        _titleController.clear();
+        _subjectController.clear();
+      });
+    }
+  }
 
   void _toggleTask(int i) {
     setState(() => _tasks[i]['done'] = !_tasks[i]['done']);
@@ -51,13 +64,89 @@ class _HomeScreenState extends State<HomeScreen> {
     return _tasks.isEmpty ? 0 : done / _tasks.length;
   }
 
+  // ✅ ADD TASK SECTION (NEW!)
+  Widget _addTaskSection() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.green.withOpacity(0.1), Colors.transparent],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.green.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: const BoxDecoration(
+                  color: Colors.green,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.add, color: Colors.white),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                "Add Study Task",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _titleController,
+            decoration: InputDecoration(
+              hintText: "Task (e.g. Read ASC 314)",
+              prefixIcon: const Icon(Icons.task),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              filled: true,
+              fillColor: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _subjectController,
+            decoration: InputDecoration(
+              hintText: "Subject",
+              prefixIcon: const Icon(Icons.book),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              filled: true,
+              fillColor: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 44,
+            child: ElevatedButton(
+              onPressed: _addTask,
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+              child: const Text(
+                "Add Task",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _dashboard() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ✅ Header
+          // ✅ Header (YOUR ORIGINAL)
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
@@ -73,7 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  "Good day, Student! 👋",
+                  "Good day, Daniela! 👋",
                   style: TextStyle(color: Colors.white70, fontSize: 14),
                 ),
                 const SizedBox(height: 4),
@@ -119,9 +208,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          const SizedBox(height: 24),
+          // ✅ NEW ADD TASK SECTION
+          _addTaskSection(),
 
-          // ✅ Quick stats
+          // ✅ Quick stats (YOUR ORIGINAL)
           Row(
             children: [
               _statCard("24", "Lessons", Icons.book, Colors.blue),
@@ -141,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 12),
 
-          // ✅ Task list
+          // ✅ Task list (YOUR ORIGINAL)
           ..._tasks.asMap().entries.map((entry) {
             int i = entry.key;
             final task = entry.value;
@@ -154,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
+                    color: Colors.black.withOpacity(0.04),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -166,7 +256,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.1),
+                      color: color.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(Icons.book, color: color),
@@ -254,13 +344,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ YOUR PERFECT 4-TAB ORDER
     final pages = [
-      _dashboard(),
-      const Profile(),
-      const LeaderboardScreen(),
-      const LessonsScreen(),
-      const ResultScreen(),
-      const QuizScreen(),
+      _dashboard(), // 🏠 Home
+      const LessonsScreen(), // 📚 Lessons
+      const QuizScreen(), // 🧠 Quiz
+      const Profile(), // 👤 Profile
     ];
 
     return Scaffold(
@@ -285,27 +374,26 @@ class _HomeScreenState extends State<HomeScreen> {
             label: "Home",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_rounded),
-            label: "Profile",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.leaderboard_rounded),
-            label: "Leaders",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.play_lesson_rounded),
+            icon: Icon(Icons.menu_book_rounded),
             label: "Lessons",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart_rounded),
-            label: "Results",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.quiz_rounded),
             label: "Quiz",
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_rounded),
+            label: "Profile",
+          ),
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _subjectController.dispose();
+    super.dispose();
   }
 }

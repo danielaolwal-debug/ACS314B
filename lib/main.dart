@@ -14,51 +14,51 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'StudyPlanner',
+      title: 'StudyPlanner Pro',
       initialRoute: "/splash",
       getPages: routes,
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: const Color(0xFF2E7D32), // Richer green
+        colorSchemeSeed: const Color(0xFF1B5E20),
+        scaffoldBackgroundColor: const Color(0xFFF8FAFC),
         textTheme: GoogleFonts.poppinsTextTheme(),
-        scaffoldBackgroundColor: const Color(0xFFF5F7FA),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.green,
+        appBarTheme: AppBarTheme(
+          backgroundColor: const Color(0xFF2E7D32),
           foregroundColor: Colors.white,
           centerTitle: true,
           elevation: 0,
-        ),
-        cardTheme: CardThemeData(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
           ),
-          color: Colors.white,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green,
+            backgroundColor: const Color(0xFF2E7D32),
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
             ),
-            padding: const EdgeInsets.symmetric(vertical: 14),
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
           ),
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: Colors.grey[100],
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 18,
+          ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide.none,
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: Colors.grey.shade200),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Colors.green, width: 1.5),
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Color(0xFF2E7D32), width: 2),
           ),
         ),
       ),
