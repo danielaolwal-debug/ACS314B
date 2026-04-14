@@ -73,7 +73,7 @@ class LeaderboardScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
+                      color: Colors.black.withValues(alpha: 0.04),
                       blurRadius: 6,
                       offset: const Offset(0, 2),
                     ),
@@ -91,7 +91,7 @@ class LeaderboardScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     CircleAvatar(
-                      backgroundColor: Colors.green.withOpacity(0.1),
+                      backgroundColor: Colors.green.withValues(alpha: 0.1),
                       child: Text(
                         leader['avatar'] as String,
                         style: const TextStyle(

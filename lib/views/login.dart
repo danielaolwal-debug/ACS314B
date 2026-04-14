@@ -64,7 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
             backgroundColor: Colors.green,
             colorText: Colors.white,
           );
-          // ✅ Fixed route name to match your GetPage definition
+
           Get.offAllNamed("/HomeScreen");
         } else {
           Get.snackbar(

@@ -56,7 +56,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           height: 160,
                           width: 160,
                           decoration: BoxDecoration(
-                            color: (page['color'] as Color).withOpacity(0.1),
+                            color: (page['color'] as Color).withValues(
+                              alpha: 0.1,
+                            ),
                             borderRadius: BorderRadius.circular(80),
                           ),
                           child: Icon(
