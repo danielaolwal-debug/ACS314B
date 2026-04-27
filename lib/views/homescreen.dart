@@ -1,6 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/views/lessons.dart';
-import 'package:flutter_application_1/views/quiz.dart';
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'lessons.dart';
+import 'quiz.dart';
 import 'profile.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,32 +16,62 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _index = 0;
 
-  // ✅ Controllers for ADD TASK
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _subjectController = TextEditingController();
 
-  final List<Map<String, dynamic>> _tasks = [
-    {
-      'title': 'Read ASC 314 Chapter 1',
-      'subject': 'Computer Science',
-      'done': false,
-      'color': Colors.green,
-    },
-    {
-      'title': 'Practice Flutter Routing',
-      'subject': 'Mobile Development',
-      'done': true,
-      'color': Colors.blue,
-    },
-    {
-      'title': 'Solve Math Assignment',
-      'subject': 'Mathematics',
-      'done': false,
-      'color': Colors.orange,
-    },
-  ];
+  List<Map<String, dynamic>> _tasks = [];
 
-  // ✅ ADD TASK FUNCTION
+  // ── Color palette for tasks ─────────────────────────────────
+  final List<Color> _taskColors = [
+    Colors.green,
+    Colors.blue,
+    Colors.orange,
+    Colors.purple,
+    Colors.teal,
+    Colors.red,
+  ];
+  int _colorIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTasks();
+  }
+
+  // ── Persist tasks ───────────────────────────────────────────
+  Future<void> _loadTasks() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? raw = prefs.getString('tasks');
+    if (raw != null) {
+      final List decoded = jsonDecode(raw);
+      setState(() {
+        _tasks = decoded.map<Map<String, dynamic>>((t) {
+          return {
+            'title': t['title'],
+            'subject': t['subject'],
+            'done': t['done'],
+            'colorIndex': t['colorIndex'] ?? 0,
+          };
+        }).toList();
+      });
+    }
+  }
+
+  Future<void> _saveTasks() async {
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = jsonEncode(
+      _tasks.map((t) {
+        return {
+          'title': t['title'],
+          'subject': t['subject'],
+          'done': t['done'],
+          'colorIndex': t['colorIndex'],
+        };
+      }).toList(),
+    );
+    await prefs.setString('tasks', encoded);
+  }
+
   void _addTask() {
     if (_titleController.text.trim().isNotEmpty &&
         _subjectController.text.trim().isNotEmpty) {
@@ -47,16 +80,35 @@ class _HomeScreenState extends State<HomeScreen> {
           'title': _titleController.text.trim(),
           'subject': _subjectController.text.trim(),
           'done': false,
-          'color': Colors.purple,
+          'colorIndex': _colorIndex % _taskColors.length,
         });
+        _colorIndex++;
         _titleController.clear();
         _subjectController.clear();
       });
+      _saveTasks();
     }
   }
 
   void _toggleTask(int i) {
     setState(() => _tasks[i]['done'] = !_tasks[i]['done']);
+    _saveTasks();
+  }
+
+  // ── Only completed tasks can be removed by the user ────────
+  void _removeTask(int i) {
+    if (_tasks[i]['done'] == true) {
+      setState(() => _tasks.removeAt(i));
+      _saveTasks();
+    } else {
+      Get.snackbar(
+        "Can't Remove",
+        "Complete the task first before removing it",
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
   double get progress {
@@ -64,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return _tasks.isEmpty ? 0 : done / _tasks.length;
   }
 
-  // ✅ ADD TASK SECTION (NEW!)
+  // ── Add Task Section ────────────────────────────────────────
   Widget _addTaskSection() {
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
@@ -146,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ✅ Header (YOUR ORIGINAL)
+          // ── Header ────────────────────────────────────────────
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
@@ -162,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  "Good day, Daniela! 👋",
+                  "Good day! 👋",
                   style: TextStyle(color: Colors.white70, fontSize: 14),
                 ),
                 const SizedBox(height: 4),
@@ -179,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "${(_tasks.where((t) => t['done']).length)} of ${_tasks.length} tasks done",
+                      "${_tasks.where((t) => t['done']).length} of ${_tasks.length} tasks done",
                       style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 13,
@@ -208,95 +260,127 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // ✅ NEW ADD TASK SECTION
-          _addTaskSection(),
-
-          // ✅ Quick stats (YOUR ORIGINAL)
-          Row(
-            children: [
-              _statCard("24", "Lessons", Icons.book, Colors.blue),
-              const SizedBox(width: 12),
-              _statCard("18", "Quizzes", Icons.quiz, Colors.orange),
-              const SizedBox(width: 12),
-              _statCard("82%", "Avg Score", Icons.star, Colors.purple),
-            ],
-          ),
-
           const SizedBox(height: 24),
 
+          // ── Add Task ──────────────────────────────────────────
+          _addTaskSection(),
+
+          // ── Task List ─────────────────────────────────────────
           const Text(
             "Today's Tasks",
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-
           const SizedBox(height: 12),
 
-          // ✅ Task list (YOUR ORIGINAL)
+          if (_tasks.isEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 32),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.check_circle_outline,
+                      size: 56,
+                      color: Colors.grey[300],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      "No tasks yet — add one above!",
+                      style: TextStyle(color: Colors.grey[400], fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
           ..._tasks.asMap().entries.map((entry) {
             int i = entry.key;
             final task = entry.value;
-            final color = task['color'] as Color;
-            return Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+            final color =
+                _taskColors[(task['colorIndex'] as int) % _taskColors.length];
+            return Dismissible(
+              key: Key('${task['title']}_$i'),
+              direction: task['done'] == true
+                  ? DismissDirection.endToStart
+                  : DismissDirection.none,
+              onDismissed: (_) => _removeTask(i),
+              background: Container(
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.only(right: 20),
+                margin: const EdgeInsets.only(bottom: 10),
+                decoration: BoxDecoration(
+                  color: Colors.red[100],
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(Icons.delete, color: Colors.red),
               ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
-                    child: Icon(Icons.book, color: color),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          task['title'],
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            decoration: task['done']
-                                ? TextDecoration.lineThrough
-                                : TextDecoration.none,
-                            color: task['done'] ? Colors.grey : Colors.black,
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(Icons.book, color: color),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            task['title'],
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              decoration: task['done']
+                                  ? TextDecoration.lineThrough
+                                  : TextDecoration.none,
+                              color: task['done'] ? Colors.grey : Colors.black,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          task['subject'],
-                          style: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 12,
+                          const SizedBox(height: 2),
+                          Text(
+                            task['subject'],
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                      ],
+                          if (task['done'] == true)
+                            const Text(
+                              "Swipe left to remove",
+                              style: TextStyle(color: Colors.red, fontSize: 10),
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
-                  Checkbox(
-                    value: task['done'],
-                    activeColor: color,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
+                    Checkbox(
+                      value: task['done'],
+                      activeColor: color,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      onChanged: (_) => _toggleTask(i),
                     ),
-                    onChanged: (_) => _toggleTask(i),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           }),
@@ -305,51 +389,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _statCard(String value, String label, IconData icon, Color color) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 22),
-            const SizedBox(height: 6),
-            Text(
-              value,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: color,
-              ),
-            ),
-            Text(
-              label,
-              style: TextStyle(color: Colors.grey[500], fontSize: 11),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    // ✅ YOUR PERFECT 4-TAB ORDER
     final pages = [
-      _dashboard(), // 🏠 Home
-      const LessonsScreen(), // 📚 Lessons
-      const QuizScreen(), // 🧠 Quiz
-      const Profile(), // 👤 Profile
+      _dashboard(),
+      const LessonsScreen(),
+      const QuizScreen(),
+      const Profile(),
     ];
 
     return Scaffold(

@@ -12,7 +12,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final Logincontroller logincontroller = Get.put(Logincontroller());
+  // ✅ Use Get.find — controller is already registered in main.dart
+  final Logincontroller logincontroller = Get.find<Logincontroller>();
+
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
@@ -24,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> loginUser() async {
-    if (emailController.text.isEmpty) {
+    if (emailController.text.trim().isEmpty) {
       Get.snackbar(
         "Error",
         "Enter email",
@@ -47,9 +49,10 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final response = await http.post(
         Uri.parse("http://localhost/studyplanner/login.php"),
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
         body: {
-          'email': emailController.text.trim(),
-          'password': passwordController.text.trim(),
+          "email": emailController.text.trim(),
+          "password": passwordController.text,
         },
       );
 
@@ -57,10 +60,13 @@ class _LoginScreenState extends State<LoginScreen> {
         final serverData = jsonDecode(response.body);
 
         if (serverData['success'] == true) {
-          final user = serverData['user'];
+          //  Save both id and name into the global controller
+          logincontroller.studentId.value = serverData['student_id'] ?? 0;
+          logincontroller.studentName.value = serverData['name'] ?? 'Student';
+
           Get.snackbar(
-            "Welcome",
-            "Hello ${user['firstname'].toString().isEmpty ? user['lastname'] : user['firstname']}!",
+            "Welcome 👋",
+            "Hello ${logincontroller.studentName.value}!",
             backgroundColor: Colors.green,
             colorText: Colors.white,
           );
@@ -77,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         Get.snackbar(
           "Server Error",
-          "Code: ${response.statusCode}",
+          "Status code: ${response.statusCode}",
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
@@ -134,7 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 20),
 
-                  // Email field
+                  // Email
                   TextField(
                     controller: emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -151,7 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 15),
 
-                  // Password field
+                  // Password
                   Obx(
                     () => TextField(
                       controller: passwordController,
@@ -179,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 20),
 
-                  // ✅ Fixed Login button
+                  // Login button
                   MaterialButton(
                     onPressed: loginUser,
                     color: Colors.green,

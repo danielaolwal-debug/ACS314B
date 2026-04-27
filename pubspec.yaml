@@ -8,10 +8,11 @@ environment:
   sdk: ^3.11.0
 
 dependencies:
+  shared_preferences: ^2.2.3
   flutter:
     sdk: flutter
   get: ^4.6.6
-  http: ^1.1.0
+  http: ^1.2.1
   google_fonts: ^6.1.0
   curved_navigation_bar: ^1.0.6
   cupertino_icons: ^1.0.8
